@@ -1,7 +1,7 @@
 
-# SatelliteImageryAnalysis_SystemDesign_Assignment
+## SatelliteImageryAnalysis_SystemDesign_Assignment
 
-# Design of a Scalable, Extensible, and Efficient System for Satellite Imagery Acquisition and Analysis
+Design of a Scalable, Extensible, and Efficient System for Satellite Imagery Acquisition and Analysis
 ------------------------
 
 

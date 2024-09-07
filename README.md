@@ -1,8 +1,6 @@
 
 ## Satellite Image acquiry and analysis System Design 
 
-# [[![Coverage Status](https://coveralls.io/repos/github/mapbox/geojson-thumbnail/badge.svg?branch=master)](https://coveralls.io/github/mapbox/geojson-thumbnail?branch=master)
-
 ```
 npm install -g @mapbox/geojson-thumbnail
 npm link

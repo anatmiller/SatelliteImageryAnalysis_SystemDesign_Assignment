@@ -2,14 +2,14 @@
 # SatelliteImageryAnalysis_SystemDesign_Assignment
 
 # Design of a Scalable, Extensible, and Efficient System for Satellite Imagery Acquisition and Analysis
-------------------------
+-------------------------------------------------------------------------------------------------------
 
 
 ## Introduction
 This document outlines the design of a robust, scalable, extensible and efficent system that aims to acquire satellite imagery from various sources and perform analysis tasks on the acquired data. The system is designed to be scalable, extensible, and efficient, taking into consideration real-world constraints such as limited bandwidth and storage capacity.
 
 
-# # Step 1: Use Cases and Constraints
+## Step 1: Use Cases and Constraints
 
 The system is designed to handle the following use cases and constraints:
 

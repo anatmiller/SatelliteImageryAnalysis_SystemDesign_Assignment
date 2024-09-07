@@ -1,7 +1,7 @@
 
 ## Satellite Image acquiry and analysis System Design 
 
-# [![Build Status](https://travis-ci.org/mapbox/geojson-thumbnail.svg?branch=master)](https://travis-ci.org/mapbox/geojson-thumbnail) [![Coverage Status](https://coveralls.io/repos/github/mapbox/geojson-thumbnail/badge.svg?branch=master)](https://coveralls.io/github/mapbox/geojson-thumbnail?branch=master)
+# [[![Coverage Status](https://coveralls.io/repos/github/mapbox/geojson-thumbnail/badge.svg?branch=master)](https://coveralls.io/github/mapbox/geojson-thumbnail?branch=master)
 
 ```
 npm install -g @mapbox/geojson-thumbnail

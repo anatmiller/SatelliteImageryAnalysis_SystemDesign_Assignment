@@ -1,19 +1,10 @@
 
 ## Satellite Image acquiry and analysis System Design 
 
-```
-npm install -g @mapbox/geojson-thumbnail
-npm link
-
-export MapboxAccessToken=<your token>
-geojson-thumbnail <your-geojson-file> thumb.png
-```
 
 ![nmatsutbwh](https://user-images.githubusercontent.com/1288339/35072800-247f4dfc-fbb4-11e7-8141-b1abe76125f8.gif)
 
 ## [API](API.md#renderthumbnail)
-
-`geojson-thumbnail` exposes an API to render your own custom thumbnails of GeoJSON features.
 
 
 Design is Scalable, Extensible, and Efficient System for Satellite Imagery Acquisition and Analysis
@@ -89,38 +80,73 @@ The system is designed with the following assumptions:
 
 ## Step 3: Design core components
 
-## Core Component Details
+Components
+Client Interface: This is the entry point for client requests. Clients initiate requests to process satellite imagery by specifying parameters such as time frame, area of interest, image provider, and type. These requests are sent to the API Gateway.
 
-1. **Client Interface:**:
-    - Implement a data ingestion module to fetch satellite imagery from different sources.
-    - Validate the acquired data to ensure its integrity and quality.
-    - Store the acquired data in a distributed storage system for efficient retrieval.
+API Gateway: This component manages and secures client requests by handling authorization, authentication, and routing. It receives requests from clients and forwards them to the Analysis Ready Data Service (ARDS) or triggers a Lambda function for image acquisition. The API Gateway is designed to provide a secure and scalable interface, handling a large volume of requests with low latency.
 
-2. **Data Processing**:
-    - Design a distributed processing framework to handle the parallel processing of the acquired imagery.
-    - Implement scalable algorithms for various analysis tasks, such as image classification, object detection, and change detection.
-    - Utilize distributed computing resources to optimize the processing time.
+Analysis Ready Data Service (ARDS): This service handles requests related to metadata and the state of satellite imagery. It checks if the requested imagery is available, manages area of interest administration, and handles ad-hoc requests. ARDS queries MongoDB for metadata and request states. If imagery is available, it retrieves it for processing. If imagery is not available, ARDS triggers a Lambda function to order new imagery. ARDS centralizes the management of metadata and request states, facilitating efficient image retrieval and request handling.
 
-3. **Analysis Pipelines**:
-    - Develop modular and extensible pipelines for different analysis tasks.
-    - Implement algorithms and models specific to each analysis task.
-    - Integrate the pipelines with the data processing component for efficient processing.
+AWS Lambda: This service executes code in response to triggers, such as ordering new imagery when requested imagery is not available. It is triggered by the API Gateway, orders imagery from satellite providers, updates ARDS, and monitors the status of imagery acquisition. Lambda offers a serverless, on-demand execution environment, which is efficient and cost-effective for handling image ordering and status updates.
 
-4. **Data Storage**:
-    - Design a distributed storage system to handle the large volume of acquired imagery and analysis results.
-    - Utilize efficient storage mechanisms, such as distributed file systems or object storage.
-    - Implement indexing and querying mechanisms for efficient retrieval of data.
+Amazon Elastic File System (EFS): This component provides scalable and shared storage for satellite imagery, accessible by multiple EC2 instances. EFS stores acquired imagery, making it available for processing by EC2 instances. EFS is essential for handling large volumes of imagery and provides scalable concurrent access to file storage.
 
-5. **User Interface**:
-    - Develop a user-friendly web-based interface for users to interact with the system.
-    - Implement search functionality to allow users to search for relevant imagery and analysis results.
-    - Provide visualization capabilities to display the satellite imagery and analysis results in an intuitive manner.
+Amazon SQS (Simple Queue Service): This service facilitates message-based communication for event-driven processing. It signals when new imagery is available for processing. SQS receives events from the system, such as when new imagery is stored in EFS, and triggers image processing workflows. SQS enables decoupling of components, allowing asynchronous communication and reliable message delivery.
 
+EC2 Instances: These instances perform image processing tasks by retrieving imagery from EFS, executing processing algorithms, and handling large-scale computation. EC2 instances pull imagery from EFS based on SQS events and process it according to the defined pipeline. EC2 provides scalable computing resources, allowing for flexible and cost-effective management of processing loads.
+
+Apache Airflow: This tool manages and orchestrates complex workflows for image processing, including scheduling and monitoring tasks. It coordinates the execution of processing steps and ensures that tasks are executed in the correct sequence. Apache Airflow provides a powerful platform for managing workflows, which is essential for orchestrating various processing steps.
+
+AWS Batch: This service manages and executes batch processing jobs for handling large-scale computational tasks. It executes parallel processing jobs defined by the processing pipeline and scales resources as needed based on job requirements. AWS Batch offers efficient, scalable, and cost-effective batch processing by automating compute resource management and job execution.
+
+Amazon S3: This component stores processed imagery and analysis results. It receives and stores output from image processing tasks and provides durable and scalable storage for results. S3 offers high durability, scalability, and availability, making it ideal for storing large volumes of processed data.
+
+DynamoDB: This service stores metadata and structured results for quick lookups and efficient querying. It stores and retrieves metadata related to processed imagery, providing fast and predictable performance with seamless scalability.
+
+Design Justification
+----------------------------
+Scalability is achieved through components like EC2, EFS, S3, and AWS Batch, which are designed to scale horizontally, handling large volumes of imagery and processing tasks efficiently. Extensibility is ensured through modular components, such as Lambda for ordering imagery and Apache Airflow for orchestration, allowing new features or processing steps to be added with minimal disruption. Reliability is addressed by SQS and DynamoDB, which provide reliable message delivery and quick metadata access, while EFS and S3 ensure durable and accessible data storage. Cost-effectiveness is optimized through serverless components like Lambda and managed services like AWS Batch, which scale resources based on demand and avoid over-provisioning.
 
 ## Pipeline workflow:
 
+Client Request: The process begins when a client submits a request through the Client Interface, specifying parameters such as time frame, area of interest, image provider, and type.
+
+Request Handling: The Client Interface forwards the request to the API Gateway.
+
+Request Processing: The API Gateway handles authorization and authentication of the request. It then forwards the request to the Analysis Ready Data Service (ARDS).
+
+Metadata Check: ARDS checks the availability of the requested imagery. It queries MongoDB to verify if the metadata and the state of the requested imagery are available.
+
+Image Availability:
+
+If Imagery is Available: ARDS retrieves the imagery from Amazon EFS.
+If Imagery is Not Available: ARDS triggers an AWS Lambda function to order new imagery from satellite providers.
+Imagery Acquisition: The AWS Lambda function processes the order for new imagery. Once the imagery is acquired, Lambda updates ARDS with the new status.
+
+Processing Queue: Upon receiving new imagery, ARDS sends a notification to Amazon SQS to signal that new imagery is available for processing.
+
+Image Processing: EC2 instances retrieve the imagery from Amazon EFS based on notifications from SQS. They execute the image processing tasks using predefined algorithms.
+
+Workflow Orchestration: Apache Airflow manages and orchestrates the image processing workflow, scheduling and monitoring the various processing steps.
+
+Batch Processing: AWS Batch handles large-scale computational tasks, running parallel processing jobs as defined by the processing pipeline.
+
+Results Storage: After processing is complete, the processed imagery and analysis results are stored in Amazon S3 for durable and scalable storage.
+
+Metadata Storage: Metadata related to processed imagery is stored in DynamoDB for quick lookups and efficient querying.
+
+
 ## Conclusion
-The designed system provides a scalable, extensible, and efficient solution for satellite imagery acquisition and analysis. It takes into consideration real-world constraints and offers a user-friendly interface for users to interact with the system. With its modular design and distributed processing capabilities, the system is well-equipped to handle large volumes of data and perform various analysis tasks on satellite imagery.
+The designed pipeline provides a robust framework for satellite imagery acquisition and analysis. By incorporating a series of well-defined steps, the system ensures efficient handling of client requests, effective management of imagery availability, and comprehensive processing workflows.
+
+Key elements of the system include:
+
+A secure and scalable Client Interface and API Gateway for managing and authenticating requests.
+Analysis Ready Data Service (ARDS) for checking imagery availability and initiating new orders if necessary.
+AWS Lambda for managing imagery acquisition and status updates.
+EC2 instances and AWS Batch for handling large-scale image processing tasks.
+Amazon S3 and DynamoDB for storing processed imagery and metadata.
+This structured approach ensures that the system can scale to handle large volumes of data, maintain reliability through effective orchestration and processing, and offer a user-friendly interface for interaction with the processed imagery. The design emphasizes flexibility, scalability, and efficiency, making it well-suited for managing and analyzing satellite imagery.
 
 Assignee : Anat Miller 
 

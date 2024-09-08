@@ -2,8 +2,6 @@
 ## Satellite Image acquiry and analysis System Design 
 
 
-![nmatsutbwh](https://user-images.githubusercontent.com/1288339/35072800-247f4dfc-fbb4-11e7-8141-b1abe76125f8.gif)
-
 ## [API](API.md#renderthumbnail)
 
 

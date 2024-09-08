@@ -1,10 +1,6 @@
 
 ## Satellite Image acquiry and analysis System Design 
 
-
-## [API](API.md#renderthumbnail)
-
-
 Design is Scalable, Extensible, and Efficient System for Satellite Imagery Acquisition and Analysis
 
 ------------------------
@@ -71,10 +67,7 @@ The system is designed with the following assumptions:
 
 
 # # Step 2: High level design
-
-![Imgur](http://i.imgur.com/xjdAAUv.png)
-
-
+see excalidraw file under the same directory.
 
 ## Step 3: Design core components
 

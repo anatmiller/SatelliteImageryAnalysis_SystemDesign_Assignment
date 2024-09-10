@@ -1,514 +1,236 @@
----
 
-excalidraw-plugin: parsed
-tags: [excalidraw]
 
----
-==⚠  Switch to EXCALIDRAW VIEW in the MORE OPTIONS menu of this document. ⚠== You can decompress Drawing data with the command palette: 'Decompress current Excalidraw file'. For more info check in plugin settings under 'Saving'
+### Satellite Image Acquisition and Analysis System Design
 
+## Design is Scalable, Extensible, and Efficient System for Satellite Imagery Acquisition and Analysis
 
-# Excalidraw Data
-## Text Elements
-Satellite system - NASA ^ujLzp0ha
+# Introduction
+This document outlines the design of a robust, scalable, extensible, and efficient system that aims to acquire satellite imagery from various sources and perform analysis tasks on the acquired data. The system is designed to be scalable, extensible, and efficient, taking into consideration real-world constraints such as limited bandwidth and storage capacity.
 
-Satellite ^rVJV9P3Y
+## Table of Contents
+1. [Introduction](#introduction)
+2. [Step 1: Use Cases and Constraints](#step-1-use-cases-and-constraints)
+   - [Use Cases](#use-cases)
+   - [Constraints](#constraints)
+   - [Assumptions](#assumptions)
 
-Satellite system - commercial satellite company ^7yj9f7Jk
+## Step 1: Use Cases and Constraints
 
-API Gateway ^rFvLogZD
+The system is designed to handle the following use cases and constraints:
 
-EC2 ^TKXOUcs7
+### Use Cases
 
-Airflow ^kjcxlhbR
+1. **Acquire Satellite Imagery**:
+   - Connects to multiple satellite imagery providers.
+   - Retrieves images based on parameters like area of interest, time frame, and resolution.
+   - Stores raw imagery in scalable storage.
 
-S3 ^DuYcc9Iw
+2. **Define and Execute Analysis Pipelines**:
+   - Users define a sequence of processing steps (e.g., vegetation index calculation).
+   - Executes the defined processing pipeline on the acquired imagery.
+   - Stores and provides access to the analysis results.
 
-Image processing pipeline ^uAd6Ji7S
+3. **Retrieve Processed Results**:
+   - Users can query and retrieve processed images and analysis outputs.
+   - The system provides access to the results through an API, user interface, or web interface.
 
-Satellite ^PiBoUSd9
+### Constraints
 
-Cluster of EC2 instances ^1AqTdjBP
+1. **Data Volume and Storage**: The system should efficiently handle large volumes of high-resolution imagery and store it.
+2. **Processing Time**: The system should execute analysis pipelines within acceptable time frames to provide timely results.
+3. **Integration Flexibility**: The system must seamlessly integrate with various data formats and APIs from different satellite image providers.
+4. **Scalability**: The system should easily scale horizontally to handle varying loads and high processing demands.
+5. **Security**: The system must prioritize data security and comply with relevant privacy regulations.
+6. **Efficiency**: The system should optimize resource utilization and minimize processing time to achieve efficient performance.
 
-Result of analysis
-Are published to
-S3 ^XrSmjvmx
 
-Lambda function 
-To trigger ^rFpYdaR7
+## Assumptions
 
-Virtual private cloud ^iw6HaKLN
+The system is designed with the following key assumptions:
 
-Amazon SQS ^eUEAuyl3
+1. **Data Acquisition**: The system will seamlessly acquire satellite imagery from multiple providers, irrespective of the data formats used by each provider.
 
-Acquire Sattlite Image service ^vRXL9kzz
+2. **Processing Pipelines**: Users will have the flexibility to define custom processing pipelines by selecting from a set of predefined steps, ensuring tailored analysis workflows.
 
-S3 ^tylZeOME
+3. **Resource Management**: The system will dynamically scale its computational and storage resources based on real-time demand and workload, ensuring optimal performance and efficiency.
 
-(2) API Gateway:
------------------------
+4. **Data Quality**: The acquired imagery from different providers will adhere to agreed-upon quality standards, guaranteeing accurate and reliable analysis results.
 
-Sends the Request 
-to Data Processing 
-pipeline service ^5QNPYW6I
+5. **User Interaction**: Users will interact with the system through a user-friendly API or interface, enabling them to easily submit requests and retrieve results.
 
-Storage service ^2Yi7hyVD
+5. **User Interaction**: Users will interact with the system through a user-friendly API or interface, enabling them to easily submit requests and retrieve results.
 
-AWS Batch ^R1z9kQ2K
+6. **Resource Management**: The system will dynamically scale its computational and storage resources based on real-time demand and workload, ensuring optimal performance and efficiency.
 
-AirFlow
-Define and
-Schedule AWS
-Batch from 
-DAG
- ^QfHGVJuw
+7. **Data Quality**: The acquired imagery from different providers will adhere to agreed-upon quality standards, guaranteeing accurate and reliable analysis results.
 
-Get the seatllite image:
----------------------------
-1. Sending API GET request
-2. From the seallite platform
- ^lgRYAXlp
 
-Seatllite Image acquisition service ^kg7y0ol8
+### Step 2: High level design
 
-Stores raw satellite images and metadata ^sL2sVAGt
+## Step 3: Design Core Components
 
-Lambda function ^BY20PmjU
+### 1. Client Interface
+This is the entry point for client requests. Clients initiate requests to process satellite imagery by specifying parameters such as time frame, area of interest, image provider, and type. These requests are sent to the API Gateway.
 
-Stores:
---------------
+### 2. API Gateway
+This component manages and secures client requests by handling authorization, authentication, and routing. It receives requests from clients and forwards them to the Analysis Ready Data Service (ARDS) or triggers a Lambda function for image acquisition. The API Gateway is designed to provide a secure and scalable interface, handling a large volume of requests with low latency.
 
-1. Request metadata
-   (Request id, user id,etc..)
+### 3. Analysis Ready Data Service (ARDS)
+This service handles requests related to metadata and the state of satellite imagery. It checks if the requested imagery is available, manages area of interest administration, and handles ad-hoc requests. ARDS queries MongoDB for metadata and request states. If imagery is available, it retrieves it for processing. If imagery is not available, ARDS triggers a Lambda function to order new imagery. ARDS centralizes the management of metadata and request states, facilitating efficient image retrieval and request handling.
 
-2. Processing pipeline id
-   (PipelinedID, name of pipeline,etc..) 
+### 4. AWS Lambda
+This service executes code in response to triggers, such as ordering new imagery when requested imagery is not available. It is triggered by the API Gateway, orders imagery from satellite providers, updates ARDS, and monitors the status of imagery acquisition. Lambda offers a serverless, on-demand execution environment, which is efficient and cost-effective for handling image ordering and status updates.
 
-3 .Request status
-   (status,timestamp,...) ^iid4gWbX
+### 5. Amazon Elastic File System (EFS)
+This component provides scalable and shared storage for satellite imagery, accessible by multiple EC2 instances. EFS stores acquired imagery, making it available for processing by EC2 instances. EFS is essential for handling large volumes of imagery and provides scalable concurrent access to file storage.
 
-Stores:
------------------------
+### 6. Amazon SQS (Simple Queue Service)
+This service facilitates message-based communication for event-driven processing. It signals when new imagery is available for processing. SQS receives events from the system, such as when new imagery is stored in EFS, and triggers image processing workflows. SQS enables decoupling of components, allowing asynchronous communication and reliable message delivery.
 
-raw and processed sattelite images and metadata
- ^sd0wOful
+### 7. EC2 Instances
+These instances perform image processing tasks by retrieving imagery from EFS, executing processing algorithms, and handling large-scale computation. EC2 instances pull imagery from EFS based on SQS events and process it according to the defined pipeline. EC2 provides scalable computing resources, allowing for flexible and cost-effective management of processing loads.
 
-(4) Seatllite Image acquisition service
---------------------------------------------
+### 8. Apache Airflow
+This tool manages and orchestrates complex workflows for image processing, including scheduling and monitoring tasks. It coordinates the execution of processing steps and ensures that tasks are executed in the correct sequence. Apache Airflow provides a powerful platform for managing workflows, which is essential for orchestrating various processing steps.
 
-1. API to login for authentication
+### 9. AWS Batch
+This service manages and executes batch processing jobs for handling large-scale computational tasks. It executes parallel processing jobs defined by the processing pipeline and scales resources as needed based on job requirements. AWS Batch offers efficient, scalable, and cost-effective batch processing by automating compute resource management and job execution.
 
-2,  Get Seatllite image with 
-   parameters ^7OyPp2jb
+### 10. Amazon S3
+This component stores processed imagery and analysis results. It receives and stores output from image processing tasks and provides durable and scalable storage for results. S3 offers high durability, scalability, and availability, making it ideal for storing large volumes of processed data.
 
+### 11. DynamoDB
+This service stores metadata and structured results for quick lookups and efficient querying. It stores and retrieves metadata related to processed imagery, providing fast and predictable performance with seamless scalability.
+
+![System Architecture Diagram](https://github.com/anatmiller/SatelliteImageryAnalysis_SystemDesign_Assignment/blob/main/SatelliteImageryAcquireAnalysis.excalidraw.pdf)
+
+Design Justification
+## Design Justification
 
-API GATEWAY:
------------------------
+### Scalability
+Scalability is achieved through the use of several key components:
+- **EC2 (Elastic Compute Cloud)**: Provides scalable computing resources that can be adjusted based on the workload. EC2 instances can be added or removed dynamically to handle varying loads, ensuring efficient processing of large volumes of satellite imagery.
+- **EFS (Elastic File System)**: Offers scalable file storage that can grow and shrink automatically as files are added and removed. EFS supports concurrent access from multiple EC2 instances, making it ideal for large-scale image processing tasks.
+- **S3 (Simple Storage Service)**: Provides highly scalable object storage for storing raw and processed imagery. S3 can handle virtually unlimited amounts of data, ensuring that storage capacity is never a bottleneck.
+- **AWS Batch**: Manages and executes batch processing jobs, automatically scaling compute resources based on the volume and complexity of the tasks. This ensures that large-scale processing jobs are handled efficiently without manual intervention.
 
-1.  Authentication & Authorization
-2.  Rate Limiting
-3.  Routing 
-4.  Load balancing 
-    and more ... ^HnfGJruI
+### Extensibility
+Extensibility is ensured through the use of modular components:
+- **AWS Lambda**: Allows for the addition of new functions and processing steps without disrupting existing workflows. Lambda functions can be easily integrated into the system to handle specific tasks, such as ordering new imagery or processing data.
+- **Apache Airflow**: Provides a flexible and powerful platform for orchestrating complex workflows. New processing steps or features can be added to the workflow definition, allowing the system to evolve and adapt to new requirements with minimal disruption.
 
-(1)  REST API HTTP REQUEST :
---------------------------------------------
+### Reliability
+Reliability is addressed through the use of robust and fault-tolerant components:
+- **Amazon SQS (Simple Queue Service)**: Ensures reliable message delivery between components, enabling asynchronous communication and decoupling of system parts. SQS guarantees that messages are delivered at least once, providing resilience against failures.
+- **DynamoDB**: Offers fast and reliable access to metadata and structured data. DynamoDB's high availability and fault tolerance ensure that metadata is always accessible, even in the event of hardware failures.
+- **EFS and S3**: Provide durable and highly available storage solutions. EFS ensures that file storage is replicated across multiple availability zones, while S3 offers 99.999999999% durability by replicating data across multiple data centers.
 
-   Run request with the following Parameters:
-   1. Area of Intrest             
-   1. Image provider/type
-   2. Time frame 
-   3. List of processing steps - Like:Ndvi calc] ^xxEZDjaw
+### Cost-Effectiveness
+Cost-effectiveness is optimized through the use of serverless and managed services:
+- **AWS Lambda**: Executes code in response to events, scaling automatically based on the number of incoming requests. This serverless model eliminates the need for provisioning and managing servers, reducing operational costs.
+- **AWS Batch**: Manages compute resources for batch processing jobs, scaling resources up or down based on demand. This ensures that resources are used efficiently, avoiding the costs associated with over-provisioning.
+- **S3 and EFS**: Offer cost-effective storage solutions with pay-as-you-go pricing models. S3's tiered storage options allow for cost savings by moving infrequently accessed data to lower-cost storage classes.
 
-CLIENT ^XvzheLi5
 
-Amazon DynamoDB ^wA1iePTd
+## Design justification for system design componenets:
 
-SATELLITE IMAGERY ANALYSIS AND DESIGN hOME ^uTBFFchm
+1. DynamoDB - 
+   Using NoSQL to reterive large dataset on low latency.
+   When using NoSQL DB the alternatives are: 
+   * MongoDB - document based additional managment overhead
+   * Couchbase
+   * Cassandra - wide column storage
 
-High level design  ^r1NgufiB
+DynamoDB is a good choise for big data and ETL:
 
-HTTP Requests ^uiPxx8GF
+------------------------------------------------
 
-Amazon SQS ^pw3Sn1Tg
+DynamoDB is really good choice cause if its efficency to handle
+Large volume of data in very low latency.
+It support Auto scaling. 
+And is easly integrated to AWS. 
+And high avalbilty and durabilty.
 
-Stores:
---------------------
-1. Real-time status updates
-   * Processing status per request
-   * Errors
-   * Logs ^pwbzylkw
+1.Scalability:
+Amazon DynamoDB stands out due to its fully managed nature, seamless scalability, high performance with low latency, integrated high availability and durability, and deep integration with the AWS ecosystem. Its managed capacity modes and advanced features like DAX, transactional support, and Streams offer a comprehensive solution for modern, high-performance applications.
 
-Lambda function will invoke imagery order
- 
- ^dQ8PSDBm
+. Fully Managed Service
+No Infrastructure Management: DynamoDB is a fully managed database service, which means AWS handles all aspects of database management, including hardware provisioning, setup, configuration, replication, software patching, and backups.
+Operational Simplicity: Reduces operational overhead and complexity, allowing you to focus on application development rather than database management.
+2. Seamless Scalability
+Automatic Scaling: DynamoDB automatically scales throughput capacity and storage based on demand. You don’t need to manually adjust settings or manage clusters.
+Global Tables: Provides multi-region replication with Global Tables, which allows for seamless data distribution and high availability across different geographic locations.
+3. High Performance
+Single-Digit Millisecond Latency: Designed for high performance with single-digit millisecond response times for read and write operations.
+In-Memory Caching: DynamoDB Accelerator (DAX) is an in-memory caching service that provides microsecond response times for cached data, further improving performance.
+4. Built-In High Availability and Durability
+Multi-AZ Replication: Data is automatically replicated across multiple Availability Zones within a region, ensuring high availability and fault tolerance.
+Automated Backups: Provides automated backups and point-in-time recovery to protect against data loss.
+5. Flexible Data Model
+Key-Value and Document Store: Supports both key-value and document data models, allowing for flexible schema design.
+Attributes and Indexes: Supports various types of indexes, including Global Secondary Indexes (GSI) and Local Secondary Indexes (LSI), to optimize query performance.
+6. Integrated with AWS Ecosystem
+AWS Integration: Seamlessly integrates with other AWS services, such as Lambda for serverless computing, S3 for object storage, and Kinesis for real-time data processing.
+Security and Compliance: Offers built-in security features, including encryption at rest and in transit, fine-grained access control with IAM, and compliance with various industry standards.
+7. Managed Capacity and Cost Control
+Provisioned and On-Demand Capacity Modes: Allows you to choose between provisioned throughput (with predictable pricing) and on-demand capacity (with flexible scaling and cost efficiency).
+Cost-Effective: Pricing is based on usage, and you can control costs by configuring read/write capacity units and using features like reserved capacity.
+8. Easy to Get Started
+Quick Setup: Easy to set up and start using with minimal configuration, thanks to the managed nature of the service.
+Developer-Friendly: Supports a variety of SDKs and tools for different programming languages, making it easier for developers to integrate with applications.
+9. Advanced Features
+Transactional Support: Provides support for ACID transactions to ensure consistency and reliability for complex operations.
+Streams: DynamoDB Streams capture changes to items in a table and can be used for real-time processing and event-driven architectures.
 
-Satellite image is uploaded to S3 ^wL6l7YwQ
 
-Users ^97Aj5AJN
+2. S3 - blob storage
+  Designed for low latency and high throughput.
+  * Scalability: S3 excels in scalability, automatically adjusting to handle increasing data volumes and request rates without manual intervention. Its virtually unlimited capacity and high throughput make it suitable for a wide range of applications, from small files to large data lakes. 
+  you can store as much as you want .
+  Excel in providing reliable and scalble storage for wide range of data types.
+  It also offers backup and recovery for resilance.
 
-ForntEnd Client - web site  ^xWF7Tg0f
+3. Servless architecture - 
 
-Analysis ready daya service - ARDS
- ^nuFqPEcj
+4.
 
-EC2 ^bjr974Ly
 
-## Embedded Files
-7dd154b6bfd7f89107a28ab5887f96ea5f0558d8: [[API Gateway (1).svg]]
-fae6237591f4efef00002db0577504499fa60cf7: [[Pasted Image 20240905230713_286.png]]
-cad3d3cbfad94f805edf53d53a970a04a9d123db: [[Pasted Image 20240905230713_316.png]]
-11b11bf53f95218199210ea193f70fe219ab5719: [[Pasted Image 20240905231004_085.png]]
-bca7927351ab45aec08d10e466a50baf49733089: [[Lambda.svg]]
-83ee51f3a490524766d06ab0dec0551fb400b8bc: [[Simple Queue Service.png]]
-93fadb5ee80a37e7b85bdf182a317427bf3a707e: [[postgresql-ar21 (2).svg]]
-abbe352f097b62b64c0b17e9282c2ed0f24b44c2: [[aws-dynamodb-svgrepo-com.svg]]
-0ebc84f0b3dd48030c2e22b421eaddd4359780ca: [[Pasted Image 20240906232436_802.png]]
-53d6520ee11f4363b0403c0ce205b67288d612af: [[Pasted Image 20240906232508_834.png]]
-6a70ac8ae912137963d50064781a4ce8612b1326: file:///C:/Users/mizra/Downloads/aws-batch.svg
+5.PostgreSQL - 
 
-%%
-## Drawing
-```compressed-json
-N4KAkARALgngDgUwgLgAQQQDwMYEMA2AlgCYBOuA7hADTgQBuCpAzoQPYB2KqATLZMzYBXUtiRoIACyhQ4zZAHoFAc0JRJQgEYA6bGwC2CgF7N6hbEcK4OCtptbErHALRY8RMpWdx8Q1TdIEfARcZgRmBShcZQUebQBmbQAGGjoghH0EDihmbgBtcDBQMBLoeHF0QOwojmVg1JLIRhZ2LjQARgBOAA4ANn5S5tZOADlOMW52gHZ49r6k3vakgchC
 
-DmIsbggALXoG0sJmABF0qARibgAzAjCViBIt5mVSUm2YAHEAGR59AH0eIyYdgAJV+50w+0gl0I+HwAGVYPUJJJcNgNIFIRBmFBSGwANYIADqJHUkzu2NxBIRMCR6EEHkxuL8kg44VyHTubDgqLUMEmSWWhUg1jqFUFjQgEI6U26nW0ABZOjwpgBWdpLeKKzp3PloTXy7Qq7rylW9Y09KbqvrknH4hAAYTY+DYpC2AGIBZ6UndNKi8c9hOtHc7XRI
 
-cdZmNzAtlMRQSZJuPEeHF5b0kzwzZ0VTwkrM7pIEIRlNJuDx2nEBT0jbK+vEkt1uuSEOdJjxZg3eqn4ncA0I4ABJYjs1B5AC6d0u5Eyg+4HCEsLuTPWrOYw7nC6FEE0geIAFFgplssOx3c+8RcGcLtKeCqZUrs0l5XxN0QOHjZ/P8HdndgCVfUNc+BhIUAC+AzFKUsCIFsVQ1KKmJDK0pZJOWdyIaM4wVFMnTqumGZ3GsGxSug2xUARxynC2aCAb
+6.Apache Airflow - 
 
-cm4PBIqj4M4Rj2vK2z2swRi9BQ9oAIrdGwUDdEcABimLQrC1K0lIqLokgNqUkS8ZkpuFJ2lJFRYk6DyLsIxYrsO7Scty2C8vy4qlCKtIWZAxHTEm2gNoqbYmvE97PhKuqoLMiTyvEUwCr02EZkmCl2sGLrul6AqYr6v69kGTqRWG5AcJGuDRlAsbKXqyYKmmyaZg+eabgWRYlmgZYVkkVYNj0ab1o2qnNv+7Sdr0abypa2qbr2A5Dvk46bpOuDTv
 
-+65fpuS7EAZH4bhK25COs+4ZFkOSDaecDnpekxTDed43jmT7fms75oBN35sL+VEATcCCgeBm5QZphD6NE8mbuhbSoG1t5oUwwwcGMHATGg3Qod0t4qvETUSoRmwSJoSQqpihwnMEO3UXdBH/vcACqRx4r0cDdMo4kwvCiKaSiaIiB9EpqQSxLEKSHKqbaVJU482kXLpzKzWzEpcjysDmXcVlincxHOEmqraL0h2KvE8TQzwPWedwKooQk2YqkqnS
+Pipeline workflow:
+Client Request: The process begins when a client submits a request through the Client Interface, specifying parameters such as time frame, area of interest, image provider, and type.
 
-dKmZbduzikRaG6DhmlUZrbFfoJcQ5tbFb6WZdlLMJnqnRTAqGY1aaipax18r5oWxZZV7PtPr0/udlmCydk2N2msm6ulH1g7HkKkAiZcQj2jDHCfPglx4gAghQABSAASljVwAGnjIwQEKQ0SiNY1zZNErTQLqAXZui3LQea1Z40RTZ6suMAPIANIUEc7xQCqJqfCxACaygjGWMAAAoACqEJCkHlFsGW4lQ2dgdnEFw7jxDEOvcDKEYzH1/Ku/VyqA
+Request Handling: The Client Interface forwards the request to the API Gateway.
 
-BqACOnwACt5R8VyCsE+0EJDnzYJfce19x63wOLjbC1cy4iWrmwXemBgS73rEIYgcJd6XHtFAMmYDIDPTPi8aBLdYGt02ttG60x9qykOo+DypRXxnX7p+S611/w0QQDaC8QhhwQEQOsNYpDhowgQDOCQUwH7tBXpoXomhLjECmJcWUSwpi4B4N0XAmhqyaM6L0EIKpLjIyNMQbomJmDuAqAUceRls7tFbg9Qot8ygQMtlgLK/0WicEmEFWGgwAatG
+Request Processing: The API Gateway handles authorization and authentication of the request. It then forwards the request to the Analysis Ready Data Service (ARDS).
 
-BqDVAJoZh1j8iHOi6wEboCRr0VGFEMY3QETjGCIl6CfDYMobYRxyaSS5hIekOlTZ2mZqzXgYVOY0k0pU3mU09IsjZCpIWJkzIdAFOLWo1kpbcBlsqOUkN2y9GzHWHC/RNxeXiIsZIKF9Hyh0dhSGDSHRJQthAN07QEAHIOXbeK00nYpQjDbGMdw4we0THWX27QYZBTmKqUO5UI6oAVtoUxMNswxzckFBWCSGYtUTF0JMUMexMn6mPCUud86F2LqX
+Metadata Check: ARDS checks the availability of the requested imagery. It queries MongoDB to verify if the metadata and the state of the requested imagery are available.
 
-CuNc66N2bnQ4aU5ZHjR4W0paM1OnnXxQtHcK1DzrTQCeTcZ4LyML2reFhD5jovlOl3Xhf4rjY2GpwKAcJCBGAqFrBIlp6w5m6LMKYayJx8pEqNGEXkVR3DOJgT5EAy6737Kgd49KKC4D5IuSg+8/FbE1dq3VZx9WGqen4suRBlDfQgMES4/jPpMCgOYAg9qixOqgFyTEehsi4DWEwOR3D5qlBdEWNYBATVqrNVqnVeqDWYlwEIf1wJwiCoqDiIQg
+Image Availability:
 
-i2WsmrmHCqP1tA3g8SULxFDIFULIu6wJ304lTACYDSJFR2iphqn5J5IKDhJOIluGq6T0YIExrdICBa75bAfk/F+b8P5fz/oA4BvFQHSLKU07mDItm1M9vU6pjTpItMZO0vuLjukiy8ksGyEAJbcFvdLGGhttBdBQl0HoblczKvmdwKZiRIWdAWD0FCKof0Mw5tskM7ojmHPpqUOK/ozk7OdqlV2tsbk5S+UkOIyY8OsOmCad54duBygzJDLq4Mkj
+If Imagery is Available: ARDS retrieves the imagery from Amazon EFS. If Imagery is Not Available: ARDS triggers an AWS Lambda function to order new imagery from satellite providers. Imagery Acquisition: The AWS Lambda function processes the order for new imagery. Once the imagery is acquired, Lambda updates ARDS with the new status.
 
-YS7HM0FN0bxKg6vtaFwhYUbWxaNXFHKCXLmJagBB3iKg8CFHAhD5KR5Hg4xKOl46mFMvcvWC9HD2UksjZAH8XKsaTqEaQKAAAhQikjuCCfSJS8NWIlqdH3rvXcuB96dkrnCb+u8RKEl+AWKYx8ICXCuiIh9yQOrdGwksM0ao1YlXHhAZQuA4CTANMrRLSXEvyk2dnHzhBMDnF3mwNYnyJqibuFkYghmJG1BM+lsza0LOEAJkTEmUiou+ewP5tASR
+Processing Queue: Upon receiving new imagery, ARDS sends a notification to Amazon SQS to signal that new imagery is available for processing.
 
-y2dDcn0GU3QrRTF6DhMB0XYvBISNHVL5ZJUGxlC29L0IsvEBy3lruhWXyhCgI6fQ+g1CXiWzGNT3dSjYgylAMudaCy4DxepjA6wzsXwu7jKB9aJRwFy1J6l2cnHjxsiUJI2c26NC+40GOuH8MEeleB8ezgyNhcowKGjaZej/axRKII24KBZLupWieEoa2VAQNUe9rakIdHBibCUX122JhzMrVUMMCIDq2EjfTI7KL8J5dOiQ088aV16HjESRxdwA
+Image Processing: EC2 instances retrieve the imagery from Amazon EFS based on notifications from SQS. They execute the image processing tasks using predefined algorithms.
 
-IoAAWXiL8CgmA8Tyk0O0QkuBSmUy3ciWSdM7GQb3aWLZGkZ2CR2nzfS/HlOQGFqZUWfTb33ra8MjoSj2s4RmArL9yZNQ6niyqeWZZVRVUfEVLZ5z0AemiicpDO4A/QDQ1ct1Epbl1LmLectWtPSdbWSvYjpalFzASNRng8oJsr1NEnVqCxqMoSmOX1jfZM7SdKB3bjB2+Z8dXDxslhKKWjxr5AWTDLmGKdZRKThLeOFXS0xO4CJQxPVtPhIV670E
+Workflow Orchestration: Apache Airflow manages and orchestrates the image processing workflow, scheduling and monitoring the various processing steps.
 
-LhKCZVWnxOMIg2FXWaYYG0+JKIkzpIu9WeZPZzpuiuNNC7mBNXfTCBNA8AAYbb+9oRiYG2ISaueMYC7kVzrlXtMMS7qw2NyxEgx/zpB5lPX5n41vVN16R+n6U3Ct1QEfVLGmXlgFFmG9hlF+jdzQCfBTBVnlBwyeUWFVDeUPSg2Sktkjwygw0HntmQ2gwuWthoOuU3Fj33Tah9nBkILrHL3rAFCNHT0+S6F6ASF4LagFDmEWWzCL2p1lCZWC0r3Y
+Batch Processing: AWS Batch handles large-scale computational tasks, running parallel processing jobs as defined by the processing pipeline.
 
-w+yiyEH3F3DxCECMF4hVGUEwFIAAQMEkHeHeCOAKRoRKAByhBxXDQHh7h3D7kEzxzcUaDE0gCHj3EkypRHBvknnuFxl3DLgASSGrniHoF6CEHrkkAoHaHtEuH3nwE6DYHXng1x2n3QCewsInxR1KG71akZQOhZXYQ01UwjUOw0xH0xxPwg2EVEWYFwEYFaXbhkQs3VFl3aDUWhkuCzDLF6wNjLCSBCAhUuACkuAQDLE6EMVvC6DsQcXyFcTARcMs
+Results Storage: After processing is complete, the processed imagery and analysis results are stored in Amazon S3 for durable and scalable storage.
 
-Oxynx8WgFNRX2+jbDVk2Kpw6CqmCnTAZ130RiSF4kPzHSqNok53QCOCEHXmwGwE6H7Ge1rwplAJkj/1SOAMUk10FiOxAPKTAJ3QJUN2b2t03BgPNzgMt0GUlk3GIgzBNEcgVizCAxwjanJ1KCVWwkNBlD8jRKUxkPIPDyDy9BDwdnDxdij3djqQTy7ClWCyWE6zIIlDKhIzQGhnlm9n0R6FTCmRINkI6BVjciOmwiUOrxUJk3UM0O0N0P0MMP0GM
+Metadata Storage: Metadata related to processed imagery is stored in DynamoDB for quick lookups and efficient querying.
 
-NMPMJyOsK41sNJVKF7n4zsPEzby8OPCsIgDyN2l71YX7xUzfCHwqL4W5WqNrz5QFSFW4FTB+Uhkm0WCNFzzajo0dOyHlW23wC8mKPWITQkDhHiEZGNVNQjKjJVTtQdSdRdWjzCT0y9XwB9UdWdgDTuCDSiFDVIE1Ou2jX8DjVjPQEjLTQzTYCzVYBdLQDzSnStIQGLQ+UmFfSfEhktC7OmKfHiBWKenSLvTrXn0bRQNCgbTbUwkmHLCTBjj9NWEZ
+Conclusion
+The designed pipeline provides a robust framework for satellite imagery acquisition and analysis. By incorporating a series of well-defined steps, the system ensures efficient handling of client requests, effective management of imagery availability, and comprehensive processing workflows.
 
-1OOBAuPHWyVPy2ECOCNCPCMiOiNiPiMSOSO+IkiV2PXAIALuUqm1yBK0hBPsMgPBJ+mMivTFgQLhIfRt14FeU93Ly1iUSCj1lDKVRVk7J6CeTVBQiC39xQwkH2Tg2OR9HoLDzgqoMuRYNTMgHYNI3lm6FWRwwG1zD5KxMgHZNLQeX601D9hvAamVlCQEDBWFKAzaizGhglIGmpWNLr2LPKIgB1OfKcPSJE1cJ9Ak1WnexHGNNNOvAU1YXwpOmtIb
+Key elements of the system include:
 
-xfEqOP2uIBJO1K0cHKzQFMy8Is3rlIDhH0AAXoH0AhCG2a1a1QGcHa3NFTDA3wqA3BhTiGxizi0qnaASE7WC2Yz2iVGRkssy2yze3y0/FW1R3WC0uM10sq30txkMuMtMvMu8ysuHGcC8uTBqieUtFrG9nwtmyi3ctnPliTFzDTG9OmVdzm2CsW1CpW1ErW2xE222xkBCuW2UpqL0zu2gQextJu2IB6ooD6trQvkxFezyzhRKCB1+zIT+3HisLABm
+A secure and scalable Client Interface and API Gateway for managing and authenticating requests. Analysis Ready Data Service (ARDS) for checking imagery availability and initiating new orders if necessary. AWS Lambda for managing imagery acquisition and status updates. EC2 instances and AWS Batch for handling large-scale image processing tasks. Amazon S3 and DynamoDB for storing processed imagery and metadata. This structured approach ensures that the system can scale to handle large volumes of data, maintain reliability through effective orchestration and processing, and offer a user-friendly interface for interaction with the processed imagery. The design emphasizes flexibility, scalability, and efficiency, making it well-suited for managing and analyzing satellite imagery.
 
-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
-```
-%%

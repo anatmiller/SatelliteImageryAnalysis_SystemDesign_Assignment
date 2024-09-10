@@ -1,6 +1,6 @@
 
 
-### Satellite Image Acquisition and Analysis System Design
+#### Satellite Image Acquisition and Analysis System Design
 
 ## Design is Scalable, Extensible, and Efficient System for Satellite Imagery Acquisition and Analysis
 

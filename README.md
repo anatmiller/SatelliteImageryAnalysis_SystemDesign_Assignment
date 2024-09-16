@@ -1,12 +1,12 @@
 
 
-#### Satellite Image Acquisition and Analysis System Design
+# Satellite Image Acquisition and Analysis 
+
+## System Design
 
 ![][greenBadge]
 
-Anat Miller Mizrachi
-
-## Design is Scalable, Extensible, and Efficient System for Satellite Imagery Acquisition and Analysis
+### Design is Scalable, Extensible, and Efficient System for Satellite Imagery Acquisition and Analysis
 
 # Introduction
 This document outlines the design of a robust, scalable, extensible, and efficient system that aims to acquire satellite imagery from various sources and perform analysis tasks on the acquired data. The system is designed to be scalable, extensible, and efficient, taking into consideration real-world constraints such as limited bandwidth and storage capacity.

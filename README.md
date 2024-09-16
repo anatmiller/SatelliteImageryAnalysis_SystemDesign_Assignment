@@ -1,14 +1,13 @@
 
 
-# Satellite Image Acquisition and Analysis 
+# Satellite Image Acquisition and Analysis System Design
 
-## System Design
+![Visitors](https://visitor-badge.glitch.me/badge?page_id=anatmiller.SatelliteImageryAnalysis_SystemDesign_Assignment) ![Satellite Image](https://www.nasa.gov/sites/default/files/thumbnails/image/iss064e001572.jpg)
 
-- [GreenBadge](https://github.com/priyanshur66/greenbadge) -
 
-### Design is Scalable, Extensible, and Efficient System for Satellite Imagery Acquisition and Analysis
-
+### Design is Scalable, Extensible, and Efficient
 # Introduction
+
 This document outlines the design of a robust, scalable, extensible, and efficient system 
 That aims to acquire satellite imagery from various sources and perform analysis tasks on the acquired data.
 The system is designed to be scalable, extensible, and efficient, 
@@ -369,4 +368,3 @@ Key elements of the system include:
 - Amazon S3 and DynamoDB for storing processed imagery and metadata.
 
 This structured approach ensures that the system can scale to handle large volumes of data, maintain reliability through effective orchestration and processing, and offer a user-friendly interface for interaction with the processed imagery. The design emphasizes flexibility, scalability, and efficiency, making it well-suited for managing and analyzing satellite imagery.
-

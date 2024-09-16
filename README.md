@@ -2,6 +2,10 @@
 
 #### Satellite Image Acquisition and Analysis System Design
 
+![][greenBadge]
+
+Anat Miller Mizrachi
+
 ## Design is Scalable, Extensible, and Efficient System for Satellite Imagery Acquisition and Analysis
 
 # Introduction

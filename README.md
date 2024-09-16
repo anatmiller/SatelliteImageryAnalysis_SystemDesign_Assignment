@@ -2,7 +2,8 @@
 
 # Satellite Image Acquisition and Analysis System Design
 
-![Visitors](https://visitor-badge.glitch.me/badge?page_id=anatmiller.SatelliteImageryAnalysis_SystemDesign_Assignment) ![Satellite Image](https://www.nasa.gov/sites/default/files/thumbnails/image/iss064e001572.jpg)
+
+https://www.google.com/imgres?imgurl=https://ca-times.brightspotcdn.com/dims4/default/fdacb8e/2147483647/strip/true/crop/600x338%2B0%2B0/resize/1200x676!/quality/75/?url%3Dhttps%253A%252F%252Fcalifornia-times-brightspot.s3.amazonaws.com%252Fae%252Fe8%252F96acc0d0449aa61e513559d91632%252F64-swot-pass-0-resized-1.gif&imgrefurl=https://www.latimes.com/science/story/2022-12-14/why-nasas-new-mission-will-study-earths-water-from-space&h=338&w=600&tbnid=mlUkzDctS-PDVM&source=sa.im&tbnh=168&tbnw=299&usg=AI4_-kRXPm4Jy7SOLmEl6lSZtbfu4iFWCA&vet=1&docid=ke3XH5Ej0D4G7M
 
 
 ### Design is Scalable, Extensible, and Efficient
